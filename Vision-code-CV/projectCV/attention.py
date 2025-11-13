@@ -547,7 +547,7 @@ def register_initial_face(cap, face_recognizer):
     print("\n" + "="*60)
     print("📸 FACE REGISTRATION (OpenCV Method)")
     print("="*60)
-    print("Press SPACE to capture, ESC to skip")
+    print("Press SPACE to capture")
     print("="*60 + "\n")
     
     while True:
@@ -565,9 +565,7 @@ def register_initial_face(cap, face_recognizer):
                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
         cv2.putText(frame, "Press SPACE to register", (w//2-150, h-50), 
                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
-        cv2.putText(frame, "Press ESC to skip", (w//2-120, h-20), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (100, 100, 100), 1)
-        
+
         cv2.imshow("Face Registration", frame)
         
         key = cv2.waitKey(1) & 0xFF
@@ -578,10 +576,6 @@ def register_initial_face(cap, face_recognizer):
                 cv2.destroyWindow("Face Registration")
                 return True
             time.sleep(1)
-        elif key == 27:  # ESC
-            print("Registration skipped")
-            cv2.destroyWindow("Face Registration")
-            return False
 
 def calibrate(cap):
     print("\n" + "="*60)
@@ -715,7 +709,6 @@ def main():
     print("Keyboard Commands:")
     print("  ESC → Exit")
     print("  'r' → Recalibrate attention")
-    print("  'f' → Re-register face")
     print("  'c' → Calibrate sound threshold")
     print("  's' → Show sound details")
     print("  '+' → Increase sound threshold")
@@ -1029,9 +1022,6 @@ def main():
             elif key == ord('r'):
                 print("\n🔄 Recalibrating...")
                 baseline_yaw, baseline_pitch, baseline_gaze_x, baseline_gaze_y = calibrate(cap)
-            elif key == ord('f'):
-                print("\n📸 Re-registering face...")
-                register_initial_face(cap, face_recognizer)
             elif key == ord('c'):
                 print("\n🔊 Calibrating sound...")
                 sound_detector.auto_calibrate(duration=3.0)
