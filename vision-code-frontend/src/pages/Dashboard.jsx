@@ -14,6 +14,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { API_URL } from "../constants";
+import { useAuth } from "../context/FakeAuth";
 
 const levelGradients = {
   beginner: "from-green-400 to-emerald-500",
@@ -31,10 +32,14 @@ const levelIcons = {
 
 const getDifficultyColor = (level) => {
   switch (level) {
-    case "beginner":   return "bg-green-100 text-green-700";
-    case "intermediate": return "bg-purple-100 text-purple-700";
-    case "advanced":   return "bg-orange-100 text-orange-700";
-    default:           return "bg-gray-100 text-gray-700";
+    case "beginner":
+      return "bg-green-100 text-green-700";
+    case "intermediate":
+      return "bg-purple-100 text-purple-700";
+    case "advanced":
+      return "bg-orange-100 text-orange-700";
+    default:
+      return "bg-gray-100 text-gray-700";
   }
 };
 
@@ -109,11 +114,11 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("enrolled");
-
+  const { isAuthenticated, logout } = useAuth();
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
-    if (!token) {
+    if (!isAuthenticated || !token) {
       navigate("/login");
       return;
     }
@@ -157,7 +162,9 @@ export default function Dashboard() {
       ]);
 
       setStudentProfile(profile);
-      setEnrolledCourses(Array.isArray(courses) ? courses : (courses?.results ?? []));
+      setEnrolledCourses(
+        Array.isArray(courses) ? courses : (courses?.results ?? []),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load dashboard");
     } finally {
@@ -166,7 +173,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
+    logout();
     navigate("/login");
   };
 
@@ -184,7 +191,7 @@ export default function Dashboard() {
     enrolledCourses.length > 0
       ? Math.round(
           enrolledCourses.reduce((sum, c) => sum + (c.progress ?? 0), 0) /
-            enrolledCourses.length
+            enrolledCourses.length,
         )
       : 0;
 
@@ -208,7 +215,14 @@ export default function Dashboard() {
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="white" strokeWidth="2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                >
                   <polyline points="16 18 22 12 16 6" />
                   <polyline points="8 6 2 12 8 18" />
                 </svg>
@@ -233,7 +247,9 @@ export default function Dashboard() {
                   <p className="text-sm font-semibold text-gray-900 leading-none">
                     {fullName}
                   </p>
-                  <p className="text-xs text-gray-500">{studentProfile?.email}</p>
+                  <p className="text-xs text-gray-500">
+                    {studentProfile?.email}
+                  </p>
                 </div>
               </div>
               <button
@@ -326,8 +342,12 @@ export default function Dashboard() {
               className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-gray-500 font-medium">{label}</span>
-                <div className={`w-9 h-9 ${bg} rounded-lg flex items-center justify-center`}>
+                <span className="text-sm text-gray-500 font-medium">
+                  {label}
+                </span>
+                <div
+                  className={`w-9 h-9 ${bg} rounded-lg flex items-center justify-center`}
+                >
                   {icon}
                 </div>
               </div>
@@ -356,8 +376,14 @@ export default function Dashboard() {
               {/* Tabs */}
               <div className="flex gap-4 px-6 mt-4 border-b border-gray-100">
                 {[
-                  { key: "enrolled", label: `In Progress (${inProgressCourses.length})` },
-                  { key: "completed", label: `Completed (${completedCourses.length})` },
+                  {
+                    key: "enrolled",
+                    label: `In Progress (${inProgressCourses.length})`,
+                  },
+                  {
+                    key: "completed",
+                    label: `Completed (${completedCourses.length})`,
+                  },
                 ].map((tab) => (
                   <button
                     key={tab.key}
@@ -379,7 +405,9 @@ export default function Dashboard() {
                     {inProgressCourses.length === 0 ? (
                       <div className="text-center py-10">
                         <BookOpen className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                        <p className="text-gray-500 mb-4">No courses in progress</p>
+                        <p className="text-gray-500 mb-4">
+                          No courses in progress
+                        </p>
                         <Link
                           to="/courses"
                           className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition"
@@ -402,7 +430,9 @@ export default function Dashboard() {
                     {completedCourses.length === 0 ? (
                       <div className="text-center py-10">
                         <Star className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-                        <p className="text-gray-500">No completed courses yet</p>
+                        <p className="text-gray-500">
+                          No completed courses yet
+                        </p>
                         <p className="text-xs text-gray-400 mt-1">
                           Keep learning to see your completions here!
                         </p>
@@ -430,7 +460,9 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="font-bold text-gray-900">{fullName}</p>
-                  <p className="text-xs text-gray-500">{studentProfile?.email}</p>
+                  <p className="text-xs text-gray-500">
+                    {studentProfile?.email}
+                  </p>
                   <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
                     {studentProfile?.role ?? "Student"}
                   </span>
@@ -474,16 +506,30 @@ export default function Dashboard() {
               </h3>
               <div className="space-y-3">
                 {[
-                  { emoji: "🏆", title: "Fast Learner", desc: "Completed 5 lessons in one day" },
-                  { emoji: "🎓", title: "First Enrollment", desc: `Enrolled in ${enrolledCourses[0]?.title ?? "a course"}` },
-                  { emoji: "⚡", title: "Getting Started", desc: "Joined Vision-Code" },
+                  {
+                    emoji: "🏆",
+                    title: "Fast Learner",
+                    desc: "Completed 5 lessons in one day",
+                  },
+                  {
+                    emoji: "🎓",
+                    title: "First Enrollment",
+                    desc: `Enrolled in ${enrolledCourses[0]?.title ?? "a course"}`,
+                  },
+                  {
+                    emoji: "⚡",
+                    title: "Getting Started",
+                    desc: "Joined Vision-Code",
+                  },
                 ].map(({ emoji, title, desc }) => (
                   <div key={title} className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
                       {emoji}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">{title}</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {title}
+                      </p>
                       <p className="text-xs text-gray-500">{desc}</p>
                     </div>
                   </div>
@@ -503,7 +549,10 @@ export default function Dashboard() {
                   { color: "bg-blue-500", text: "45 new discussions" },
                   { color: "bg-purple-500", text: "12 live study groups" },
                 ].map(({ color, text }) => (
-                  <div key={text} className="flex items-center gap-2 text-gray-600">
+                  <div
+                    key={text}
+                    className="flex items-center gap-2 text-gray-600"
+                  >
                     <span className={`w-2 h-2 ${color} rounded-full`} />
                     {text}
                   </div>

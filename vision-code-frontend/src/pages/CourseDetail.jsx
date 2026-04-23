@@ -76,7 +76,7 @@ function ModuleAccordion({ module, idx }) {
 
   const totalDuration = module.content_items?.reduce(
     (sum, item) => sum + (item.estimated_duration_minutes || 0),
-    0
+    0,
   );
 
   return (
@@ -122,9 +122,14 @@ function ModuleAccordion({ module, idx }) {
               </p>
               <ul className="space-y-1.5">
                 {module.learning_objectives.map((obj, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-gray-700"
+                  >
                     <CheckCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
-                    {typeof obj === "string" ? obj : obj?.title ?? JSON.stringify(obj)}
+                    {typeof obj === "string"
+                      ? obj
+                      : (obj?.title ?? JSON.stringify(obj))}
                   </li>
                 ))}
               </ul>
@@ -154,7 +159,9 @@ function ModuleAccordion({ module, idx }) {
                       <span className="flex-1 text-sm text-gray-800 truncate">
                         {item.title}
                       </span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${colorClass}`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full border font-medium ${colorClass}`}
+                      >
                         {item.content_type}
                       </span>
                       <span className="text-xs text-gray-400 flex items-center gap-1 flex-shrink-0">
@@ -194,7 +201,8 @@ export default function CourseDetail() {
     setIsEnrolling(true);
     setEnrollError("");
     try {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("access_token");
+      console.log("Token for enrolling", token);
       if (!token) {
         setEnrollError("Authentication token not found. Please login again.");
         return;
@@ -204,7 +212,9 @@ export default function CourseDetail() {
       navigate(`/courses/${courseId}`);
     } catch (err) {
       setEnrollError(
-        err instanceof Error ? err.message : "Enrollment failed. Please try again."
+        err instanceof Error
+          ? err.message
+          : "Enrollment failed. Please try again.",
       );
     } finally {
       setIsEnrolling(false);
@@ -228,7 +238,9 @@ export default function CourseDetail() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-800 mb-2">Course not found</p>
+          <p className="text-2xl font-bold text-gray-800 mb-2">
+            Course not found
+          </p>
           <p className="text-gray-500 mb-6">
             {error instanceof Error ? error.message : "Something went wrong."}
           </p>
@@ -259,14 +271,14 @@ export default function CourseDetail() {
       sum +
       (mod.content_items?.reduce(
         (s, item) => s + (item.estimated_duration_minutes || 0),
-        0
+        0,
       ) || 0)
     );
   }, 0);
 
   const totalItems = course.modules?.reduce(
     (sum, mod) => sum + (mod.content_items?.length || 0),
-    0
+    0,
   );
 
   return (
@@ -296,10 +308,14 @@ export default function CourseDetail() {
             <div className="flex-1">
               {/* Badges row */}
               <div className="flex flex-wrap gap-2 mb-4">
-                <span className={`text-xs font-bold px-3 py-1 rounded-full border ${levelColor}`}>
+                <span
+                  className={`text-xs font-bold px-3 py-1 rounded-full border ${levelColor}`}
+                >
                   {capitalize(course.difficulty_level)}
                 </span>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full ${badgeColor}`}>
+                <span
+                  className={`text-xs font-bold px-3 py-1 rounded-full ${badgeColor}`}
+                >
                   {badge}
                 </span>
                 {course.topics?.slice(0, 2).map((topic) => (
@@ -363,8 +379,12 @@ export default function CourseDetail() {
                 <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-0.5">
                   Instructor
                 </p>
-                <p className="font-bold text-gray-900">{course.instructor?.name}</p>
-                <p className="text-sm text-gray-500">{course.instructor?.email}</p>
+                <p className="font-bold text-gray-900">
+                  {course.instructor?.name}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {course.instructor?.email}
+                </p>
               </div>
             </div>
 
@@ -496,7 +516,9 @@ export default function CourseDetail() {
                       className="flex justify-between items-center text-sm"
                     >
                       <span className="text-gray-500">{label}</span>
-                      <span className="font-semibold text-gray-900">{value}</span>
+                      <span className="font-semibold text-gray-900">
+                        {value}
+                      </span>
                     </div>
                   ))}
                 </div>

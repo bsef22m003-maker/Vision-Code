@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer } from "react";
+import { API_URL } from "../constants";
 const FAKE_USER = {
   name: "Vision-Code",
   email: "info@vision-code.dev",
@@ -40,7 +41,7 @@ function AuthProvider({ children }) {
   );
   async function loginApi(email, password) {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/auth/token/", {
+      const res = await fetch(`${API_URL}/api/auth/token/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,7 +66,7 @@ function AuthProvider({ children }) {
   }
   async function signupApi(firstName, lastName, email, password) {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/auth/signup/", {
+      const res = await fetch(`${API_URL}/api/auth/signup/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
