@@ -11,24 +11,33 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from datetime import timedelta
-
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-AUTH_USER_MODEL="Accounts.User"
+# ✅ FIX 1: STATIC_ROOT moved AFTER BASE_DIR definition
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+AUTH_USER_MODEL = "Accounts.User"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-m_jool6a7xb!d5fsh(p-8tr3$2uygn3zmy=ui*i9$oqb#!k7+='
+# ✅ FIX 2: SECRET_KEY loaded from environment variable (never hardcode in production)
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-dev-key-change-in-production')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# ✅ FIX 3: DEBUG loaded from environment variable
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+# ✅ FIX 4: ALLOWED_HOSTS includes localhost for local dev
+ALLOWED_HOSTS = [
+    'vision-code-backend-d6dcdrg0hhcectee.centralindia-01.azurewebsites.net',
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -46,34 +55,36 @@ INSTALLED_APPS = [
     'Courses',
     'Enrollment_Learning',
     'Gamification',
-]
-INSTALLED_APPS += [
+    # Third-party
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
-     'corsheaders',
+    'corsheaders',
 ]
 
+# ✅ FIX 5: CORS — restrict in production; set CORS_ALLOWED_ORIGINS via env var if needed
+# For now keeping CORS_ALLOW_ALL_ORIGINS but easily switchable
+CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL', 'False') == 'True'
 
-'''CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]'''
-# or for dev:
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+    if origin.strip()
+]
 
+# ✅ FIX 6: Single MIDDLEWARE definition with correct order
+# SecurityMiddleware must be first, WhiteNoise right after, CorsMiddleware before CommonMiddleware
 MIDDLEWARE = [
-     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',       # ✅ Right after SecurityMiddleware
+    'corsheaders.middleware.CorsMiddleware',             # ✅ Before CommonMiddleware
     'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-MIDDLEWARE = ["corsheaders.middleware.CorsMiddleware",] + MIDDLEWARE
 
 ROOT_URLCONF = 'vision_code.urls'
 
@@ -97,27 +108,16 @@ WSGI_APPLICATION = 'vision_code.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'VISION_CODE',        # Database name you just created
-        'USER': 'postgres',          # Username
-        'PASSWORD': 'admin123',      # Password we reset
-        'HOST': 'localhost',         # Host
-        'PORT': '5432',              # Port
-    }
-    
-}
-'''
+
+# ✅ FIX 7: All DB credentials loaded from environment variables (never hardcode passwords)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",  
-        "USER": "postgres.oktqnovgjwwzujnqlmoj",  
-        "PASSWORD": "5g&kjZ+8D4NYtZ3",
-        "HOST": "aws-1-ap-south-1.pooler.supabase.com",  
-        "PORT": "5432",
+        "NAME": os.environ.get("DBNAME", "postgres"),
+        "USER": os.environ.get("DBUSER", ""),
+        "PASSWORD": os.environ.get("DBPASS", ""),
+        "HOST": os.environ.get("DBHOST", ""),
+        "PORT": os.environ.get("DBPORT", "5432"),
         "OPTIONS": {
             "sslmode": "require",
         },
@@ -143,7 +143,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-from datetime import timedelta
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -177,26 +176,26 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# ✅ FIX 8: STATIC_URL with leading slash
+STATIC_URL = '/static/'
+
+# WhiteNoise compression and caching
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 SIMPLE_JWT = {
-    # 🔐 ACCESS TOKEN (used in every API request)
+    # ACCESS TOKEN (used in every API request)
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=6),
 
-    # 🔁 REFRESH TOKEN (used to get new access token)
+    # REFRESH TOKEN (used to get new access token)
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 
-    # Rotate refresh tokens (recommended)
     "ROTATE_REFRESH_TOKENS": True,
-
-    # Blacklist old refresh tokens (recommended)
     "BLACKLIST_AFTER_ROTATION": True,
 
-    # Security settings
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
     "AUTH_HEADER_TYPES": ("Bearer",),
 
-    # Optional but good
     "UPDATE_LAST_LOGIN": True,
 }
