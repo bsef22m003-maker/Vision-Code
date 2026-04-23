@@ -14,3 +14,5 @@ class CourseModule(models.Model):
     
     class Meta:
         db_table = 'course_modules'
+    def __str__(self):
+        return f"{self.course.title} - {self.title}"

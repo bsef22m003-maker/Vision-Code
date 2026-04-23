@@ -1,10 +1,6 @@
-import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 
-function CourseCard({ courseId }) {
-  const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
+function CourseCard({ course }) {
   const levelColors = {
     beginner: "bg-green-100 text-green-700",
     intermediate: "bg-purple-100 text-purple-700",
@@ -26,63 +22,8 @@ function CourseCard({ courseId }) {
     "all levels": "🎯",
   };
 
-  useEffect(() => {
-    async function fetchCourse() {
-      try {
-        setLoading(true);
-        setError(null);
+  if (!course) return null;
 
-        const res = await fetch(
-          `http://127.0.0.1:8000/api/courses/courses/${courseId}/`
-        );
-
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-
-        const data = await res.json();
-        console.log("Fetched course:", data);
-        setCourse(data);
-      } catch (error) {
-        console.error("Error fetching course:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (courseId) {
-      fetchCourse();
-    }
-  }, [courseId]);
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="bg-white rounded-xl shadow-md p-6 animate-pulse">
-        <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-        <p className="text-red-600 font-semibold">Failed to load course</p>
-        <p className="text-red-500 text-sm">{error}</p>
-      </div>
-    );
-  }
-
-  // No course data
-  if (!course) {
-    return null;
-  }
-
-  // Extract data from API response
   const {
     title,
     description,
@@ -90,22 +31,11 @@ function CourseCard({ courseId }) {
     topics = [],
     price,
     instructor,
-    modules = [],
+    total_modules,   // ✅ number from API e.g. 15
+    total_students,  // ✅ number from API e.g. 3
     is_published,
   } = course;
 
-  // Calculate stats
-  const totalModules = modules.length;
-  const totalContentItems = topics.length;
-  const totalDuration = modules.reduce((sum, module) => {
-    const moduleDuration = module.content_items?.reduce(
-      (contentSum, item) => contentSum + (item.estimated_duration_minutes || 0),
-      0
-    );
-    return sum + (moduleDuration || 0);
-  }, 0);
-
-  // Format duration
   const formatDuration = (minutes) => {
     if (minutes < 60) return `${minutes} mins`;
     const hours = Math.floor(minutes / 60);
@@ -113,14 +43,11 @@ function CourseCard({ courseId }) {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  // Capitalize first letter
   const capitalize = (str) => {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
 
-  // Mock data for students and rating (since API doesn't provide these)
-  const students = "0";
   const rating = 4.8;
   const reviews = "0";
 
@@ -131,25 +58,21 @@ function CourseCard({ courseId }) {
   const level = capitalize(difficulty_level);
   const badge = is_published ? "PUBLISHED" : "DRAFT";
   const badgeColor = is_published ? "text-green-600" : "text-gray-600";
+  const isFree = parseFloat(price) === 0;
 
   return (
     <div className="group relative w-full">
-      {/* Hover glow effect */}
       <div
         className={`absolute -inset-0.5 bg-gradient-to-r ${gradient} rounded-xl opacity-0 group-hover:opacity-100 blur transition duration-500`}
-      ></div>
+      />
 
-      <div className="relative bg-white rounded-xl shadow-md hover: shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full">
-        {/* Course Header with Icon */}
+      <div className="relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full">
+        {/* Header */}
         <div
           className={`relative h-48 bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden`}
         >
-          <div className="absolute inset-0 bg-black/10"></div>
-          <span
-            className={`${
-              icon.length > 2 ? "text-5xl" : "text-6xl"
-            } font-bold text-white relative z-10`}
-          >
+          <div className="absolute inset-0 bg-black/10" />
+          <span className="text-6xl font-bold text-white relative z-10">
             {icon}
           </span>
           {badge && (
@@ -159,14 +82,12 @@ function CourseCard({ courseId }) {
               {badge}
             </div>
           )}
-          {price && (
-            <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold text-gray-900">
-              ${price}
-            </div>
-          )}
+          <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold text-gray-900">
+            {isFree ? "Free" : `₹${price}`}
+          </div>
         </div>
 
-        {/* Course Content */}
+        {/* Content */}
         <div className="p-6 flex-1 flex flex-col">
           <div className="flex justify-between items-start mb-3">
             <span
@@ -181,18 +102,17 @@ function CourseCard({ courseId }) {
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
               </svg>
-              {totalModules} Module{totalModules !== 1 ? "s" : ""}
+              {total_modules} Module{total_modules !== 1 ? "s" : ""}
             </div>
           </div>
 
-          <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover: text-blue-600 transition">
+          <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition">
             {title}
           </h3>
           <p className="text-gray-600 text-sm mb-4 flex-1 line-clamp-3">
             {description}
           </p>
 
-          {/* Topics */}
           {topics.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {topics.slice(0, 3).map((topic, index) => (
@@ -211,96 +131,39 @@ function CourseCard({ courseId }) {
             </div>
           )}
 
-          {/* Course Stats */}
           <div className="space-y-2 mb-4">
             <div className="flex items-center gap-2 text-xs text-gray-600">
-              <svg
-                className="w-4 h-4 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
+              <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span>{formatDuration(totalDuration)} total</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-gray-600">
-              <svg
-                className="w-4 h-4 text-purple-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span>
-                {totalContentItems} lesson{totalContentItems !== 1 ? "s" : ""}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-gray-600">
-              <svg
-                className="w-4 h-4 text-indigo-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              <span>{students} students enrolled</span>
+              <span>{total_students?.toLocaleString()} students enrolled</span>
             </div>
             {instructor && (
               <div className="flex items-center gap-2 text-xs text-gray-600">
-                <svg
-                  className="w-4 h-4 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
+                <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span className="truncate">{instructor.email}</span>
+                <span className="truncate">{instructor.name}</span>
               </div>
             )}
           </div>
 
-          {/* Footer with Rating and CTA */}
           <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
             <div className="flex items-center gap-1">
               <div className="flex text-yellow-400">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-. 955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                 </svg>
               </div>
               <span className="font-bold text-gray-900">{rating}</span>
               <span className="text-gray-400 text-sm">({reviews})</span>
             </div>
-            <a
-              href="#"
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover: shadow-lg transition font-semibold text-sm transform hover:scale-105"
+            <NavLink
+              to={`/course/${course.id}`}
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition font-semibold text-sm transform hover:scale-105"
             >
               Go to Course
-            </a>
+            </NavLink>
           </div>
         </div>
       </div>

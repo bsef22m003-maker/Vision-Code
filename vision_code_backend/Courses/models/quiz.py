@@ -30,6 +30,8 @@ class QuizQuestion(models.Model):
         db_table = "quiz_questions"
         ordering = ["order"]
 
+    def __str__(self):
+        return self.question_text
 class QuizOption(models.Model):
     question = models.ForeignKey(
         QuizQuestion,

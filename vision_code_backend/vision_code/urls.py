@@ -22,7 +22,7 @@ router = DefaultRouter()
 # IMPORTANT: keep endpoint names lowercase & REST style
 router.register(r"users", UserViewSet, basename="user")
 #router.register(r"courses", CourseViewSet, basename="course")
-router.register(r"enrollments", EnrollmentViewSet, basename="enrollment")
+#router.register(r"enrollments", EnrollmentViewSet, basename="enrollment")
 router.register(r"course-modules", CourseModuleViewSet, basename="course-module")
 router.register(r"content-items", ContentItemViewSet, basename="content-item")
 

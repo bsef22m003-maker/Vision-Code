@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import HomePage from "./pages/HomePage";
 import { AuthProvider } from "./context/FakeAuth";
@@ -7,33 +8,21 @@ import ProtectedRouter from "./pages/ProtectedRouter";
 import Dashboard from "./pages/Dashboard";
 import CoursesPage from "./pages/CoursesPage";
 import CommunityPage from "./pages/CommunityPage";
-import { useEffect } from "react";
-import ProctoringApp from "./pages/ProctoringApp";
+import CourseDetail from "./pages/CourseDetail";
+
 export const APP_NAME = "Vision-Code";
+
+const queryClient = new QueryClient();
+
 function App() {
-  useEffect(() => {
-    async function name() {
-      const res = await fetch(" http://127.0.0.1:8000/api/users/");
-      const data = await res.json();
-      console.log(data);
-    }
-    name();
-  }, []);
-  useEffect(() => {
-    async function name() {
-      const res = await fetch(" http://127.0.0.1:8000/api/users/");
-      const data = await res.json();
-      console.log(data);
-    }
-    name();
-  }, []);
   return (
-    <div>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>
           <Routes>
             <Route index element={<HomePage />} />
             <Route path="courses" element={<CoursesPage />} />
+            <Route path="course/:id" element={<CourseDetail />} />
             <Route path="community" element={<CommunityPage />} />
             <Route
               path="app"
@@ -44,11 +33,10 @@ function App() {
               }
             />
             <Route path="login" element={<LoginForm />} />
-            <Route path="attention" element={<ProctoringApp />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
-    </div>
+    </QueryClientProvider>
   );
 }
 

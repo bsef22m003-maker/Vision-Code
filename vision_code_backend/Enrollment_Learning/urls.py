@@ -11,7 +11,7 @@ from .views import (
 router = DefaultRouter()
 
 # ✅ FIXED
-router.register(r"", EnrollmentViewSet, basename="enrollment")
+router.register(r"", EnrollmentViewSet, basename="enrollments")
 #router.register(r"progress", UserProgressViewSet)
 #router.register(r"learning-paths", LearningPathViewSet)
 

@@ -74,7 +74,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Count
 from Courses.models import Course
 from Courses.serializers.course import CourseListSerializer
-
+from rest_framework.response import Response
 
 class MyCoursesView(APIView):
     permission_classes = [IsAuthenticated]
@@ -88,4 +88,4 @@ class MyCoursesView(APIView):
         )
 
         serializer = CourseListSerializer(courses, many=True)
-        return response(serializer.data)
+        return Response(serializer.data)

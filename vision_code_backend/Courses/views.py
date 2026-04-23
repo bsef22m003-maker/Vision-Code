@@ -141,7 +141,9 @@ from .serializers.article import ArticleSerializer
 from .serializers.quiz import (
     QuizSerializer,
     QuizQuestionSerializer,
-    QuizOptionSerializer
+    QuizQuestionWriteSerializer,
+    QuizOptionSerializer,
+    QuizOptionWriteSerializer 
 )
 
 # -----------------------------
@@ -175,7 +177,11 @@ class QuizViewSet(viewsets.ModelViewSet):
 # -----------------------------
 class QuizQuestionViewSet(viewsets.ModelViewSet):
     queryset = QuizQuestion.objects.prefetch_related("options")
-    serializer_class = QuizQuestionSerializer
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return QuizQuestionWriteSerializer
+        return QuizQuestionSerializer
 
     def get_permissions(self):
         if self.action in ("create", "update", "partial_update", "destroy"):
@@ -186,9 +192,19 @@ class QuizQuestionViewSet(viewsets.ModelViewSet):
 # -----------------------------
 # QUIZ OPTION VIEWSET
 # -----------------------------
+# class QuizOptionWriteSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = QuizOption
+#         fields = ("id", "question", "option_text", "is_correct")
+
+
 class QuizOptionViewSet(viewsets.ModelViewSet):
     queryset = QuizOption.objects.all()
-    serializer_class = QuizOptionSerializer
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return QuizOptionWriteSerializer   # ✅ write
+        return QuizOptionSerializer            # ✅ read
 
     def get_permissions(self):
         if self.action in ("create", "update", "partial_update", "destroy"):
