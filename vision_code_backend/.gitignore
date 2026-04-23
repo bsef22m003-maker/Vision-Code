@@ -1,0 +1,18 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Django stuff
+*.log
+db.sqlite3
+media/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Environment variables
+.env
