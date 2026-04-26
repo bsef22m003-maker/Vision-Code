@@ -1,14 +1,7 @@
-# Ignore virtual environments
 attention_env/
+Vision-code-CV/projectCV/attention_env/
 venv/
 env/
-
-# Ignore Python cache and compiled files
 __pycache__/
-*.pyc
-
-# Ignore system or editor files
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+*.dll
+*.pyd
