@@ -1,25 +1,36 @@
 # Vision-Code
 
-![Build](https://img.shields.io/badge/build-active-brightgreen)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
 ![Backend](https://img.shields.io/badge/backend-Django%20%7C%20DRF-blue)
+![CV Service](https://img.shields.io/badge/CV%20service-FastAPI-teal)
 ![Database](https://img.shields.io/badge/database-PostgreSQL%20%7C%20Supabase-blueviolet)
 ![AI](https://img.shields.io/badge/AI-ML%20%7C%20Computer%20Vision-orange)
-![Status](https://img.shields.io/badge/status-Sprint%201%20Completed-success)
+![Frontend](https://img.shields.io/badge/frontend-Vercel-black)
+![Backend Hosting](https://img.shields.io/badge/backend-Railway-purple)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-Git%20Triggered-success)
+![Status](https://img.shields.io/badge/status-Completed-success)
 
 ---
 
 ## Project Description
 
-**Vision-Code** is an AI-powered adaptive e-learning platform designed to personalize learning experiences using **Machine Learning**, **Computer Vision**, and **data-driven analytics**. The platform supports role-based access for students, instructors, and administrators, enabling secure authentication, structured course delivery, intelligent content recommendations, and automated proctoring during assessments.
+**Vision-Code** is an AI-powered adaptive e-learning platform that personalizes learning experiences using **Computer Vision**, and **data-driven analytics**. The platform supports role-based access for students, instructors, and administrators, enabling secure authentication, structured course delivery, intelligent content recommendations, and automated proctoring during assessments.
 
-The system is developed following **Agile Scrum methodology**, with incremental delivery across sprints.
+The system follows a **microservices architecture** with independent deployment of the frontend, backend API, and Computer Vision service, and was developed using **Agile Scrum methodology**.
 
 ---
 
-## Features Implemented (Sprint 1)
+## Live Demo Link: https://www.vision-code.me/
+
+---
+
+## Features
 
 ### Core System
 
+* Streamlined exam integrity and proctoring for graded exams
+* marketplace for students to enroll courses
+* course publication by instructors
 * Secure user registration and login (Student / Instructor / Admin)
 * Role-based authentication and authorization
 * Session and token management
@@ -28,134 +39,132 @@ The system is developed following **Agile Scrum methodology**, with incremental 
 ### Learning Management
 
 * Student panel with:
-
   * Article-based learning system
   * Courses, modules, and structured content
   * Quiz panel with automated evaluation
 * Instructor panel with:
-
   * Course creation and publishing
   * Module and content management
 
-### AI & Computer Vision (Prototype)
+### AI & Computer Vision
 
 * Attention and proctoring module:
-
   * Eye gaze attention tracking
   * Face recognition
   * Multiple face detection
   * Sound detection during assessments
-* Machine Learning–based content recommendation system *(training & testing phase)*
-* Adaptive learning roadmap recommendation system *(training & testing phase)*
 
 ---
 
 ## System Architecture
 
-### High-Level Architecture Overview
+### Microservices Overview
 
-The platform follows a **modular client–server architecture** with integrated AI services:
+Vision-Code follows a **microservices architecture** with three independently deployed services communicating over REST:
 
-1. **Frontend Layer**
+| Service | Technology | Deployment |
+|---|---|---|
+| Frontend | HTML, CSS, JavaScript | Vercel |
+| Backend API | Django + DRF | Railway |
+| CV Service | FastAPI + OpenCV | Railway |
+| Database | PostgreSQL | Supabase |
 
-   * Web-based user interfaces for Students, Instructors, and Admins
-   * Communicates with backend services via REST APIs
+### Architecture Diagram
 
-2. **Backend Layer**
+```
+[ Web Frontend ]  ──────────────────────  Vercel
+        |
+        v (REST API)
+[ Django REST API ]  ───────────────────  Railway
+        |
+        ├──> [ PostgreSQL (Supabase) ]
+        |
+        ├──> [ ML Recommendation Engine ]
+        |
+        └──> [ CV Proctoring Service ]  ─  Railway
+                  (FastAPI + OpenCV)
+```
 
-   * Django + Django REST Framework
-   * Handles authentication, business logic, course management, and APIs
+### Service Descriptions
 
-3. **Database Layer**
+1. **Frontend Service**
+   - Web-based interfaces for Students, Instructors, and Admins
+   - Deployed on Vercel with automatic preview and production deployments
 
-   * Cloud-hosted PostgreSQL (Supabase)
-   * Stores user data, course content, quiz results, and logs
+2. **Backend API Service**
+   - Django + Django REST Framework
+   - Handles authentication, business logic, course management, and data APIs
+   - Deployed on Railway
 
-4. **AI & ML Layer**
+3. **Computer Vision Service**
+   - Standalone FastAPI microservice wrapping OpenCV-based CV models
+   - Exposes REST endpoints consumed by the Backend API
+   - Deployed independently on Railway for isolated scaling
 
-   * Recommendation engines for content and learning paths
-   * Computer Vision services for attention tracking and proctoring
-
-5. **External Services**
-
-   * Supabase for managed PostgreSQL and scalability
+4. **Database Layer**
+   - Cloud-hosted PostgreSQL via Supabase
+   - Stores user data, course content, quiz results, and logs
 
 ---
 
-## Architecture Diagram (Logical View)
+## CI/CD Pipeline
 
-```
-[ Web Frontend ]
-        |
-        v
-[ Django REST API ]
-        |
-        +--> [ PostgreSQL (Supabase) ]
-        |
-        +--> [ ML Recommendation Engine ]
-        |
-        +--> [ Computer Vision Proctoring Module ]
-```
+Deployments are fully automated and **git-triggered**:
+
+- Pushing to `main` triggers production deployments on both Vercel (frontend) and Railway (backend + CV service)
+- Pushing to feature branches triggers preview deployments on Vercel
+- No manual deployment steps required after merge
 
 ---
 
 ## Technologies Used
 
 ### Backend
-
 * Django
 * Django REST Framework
 
-### Frontend
+### Computer Vision Service
+* FastAPI
+* OpenCV
+* Python ML models (recommendation + proctoring)
 
+### Frontend
 * HTML, CSS, JavaScript
 
 ### Database
-
 * PostgreSQL (Supabase)
 
-### AI / ML & Computer Vision
-
-* Python
-* OpenCV
-* Machine Learning models for recommendation systems
+### Infrastructure & DevOps
+* Vercel (frontend hosting)
+* Railway (backend + CV service hosting)
+* Git-triggered CI/CD
 
 ---
 
-## Setup Instructions
+## Local Development Setup
 
 ### Prerequisites
 
 * Python 3.10+
 * Git
+* Node.js (if running frontend tooling locally)
 
 ### Clone the Repository
 
 ```bash
 git clone https://github.com/org/vision-code.git
-```
-
-### Navigate to Project Directory
-
-```bash
 cd vision-code
 ```
 
-### Create and Activate Virtual Environment
+### Backend API Setup
 
 ```bash
+cd backend
 python -m venv venv
 source venv/bin/activate   # Linux / macOS
 venv\Scripts\activate      # Windows
-```
-
-### Install Dependencies
-
-```bash
 pip install -r requirements.txt
 ```
-
-### Configure Environment Variables
 
 Create a `.env` file:
 
@@ -163,45 +172,60 @@ Create a `.env` file:
 DATABASE_URL=your_supabase_postgres_url
 SECRET_KEY=your_django_secret_key
 DEBUG=True
+CV_SERVICE_URL=http://localhost:8001
 ```
 
-### Apply Migrations
+Apply migrations and run:
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
-```
-
-### Run the Application
-
-```bash
 python manage.py runserver
 ```
 
-Access the application at:
+Backend available at `http://127.0.0.1:8000/`
 
+### Computer Vision Service Setup
+
+```bash
+cd cv-service
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8001
 ```
-http://127.0.0.1:8000/
-```
 
-## Known Issues / TODOs
+CV service available at `http://127.0.0.1:8001/`
 
-* Integration of computer vision proctoring into live assessments pending
-* Recommendation systems under training and evaluation
-* Instructor analytics dashboard not implemented
-* Gamification (badges, streaks) pending
-* Mobile responsiveness not fully tested
-* OAuth / social login not implemented
+### Frontend Setup
+
+Open `frontend/index.html` directly in a browser, or serve with any static file server.
+
+---
+
+## Deployment
+
+| Service | Platform | Trigger |
+|---|---|---|
+| Frontend | Vercel | Push to `main` |
+| Backend API | Railway | Push to `main` |
+| CV Service | Railway | Push to `main` |
+
+Environment variables for each service are configured via the respective platform dashboards (Vercel and Railway).
 
 ---
 
 ## Project Status
 
-* **Sprint 1:** Core system, authentication, LMS foundation, AI/CV prototypes ✔
-* **Sprint 2 (Planned):** Recommendation integration, analytics, gamification
+- **Sprint 1:** Core system, authentication ✔
+- **Sprint 2:**   LMS foundation, AI/CV prototypes ✔
+- **Sprint 3:**   integration of services ✔
+- **Deployment:** Frontend on Vercel, Backend + CV Service on Railway ✔
+- **CI/CD:** Git-triggered automated pipelines ✔
+- **Status: Complete** ✔
 
 ---
 
 ## License
 
-This project is developed for academic and research purposes.
+This project is developed for PUCIT for academic and research purposes.
